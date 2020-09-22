@@ -17,10 +17,14 @@ public class BallScript : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.IsGameOver)
+        {
+            return;
+        }
+
         if (!BallInPlay)
         {
             transform.position = BallBookMark.position;
-            Rigidbody2D.velocity = Vector2.zero;
         }
 
         if (Input.GetButtonDown("Jump") && !BallInPlay)
@@ -30,11 +34,24 @@ public class BallScript : MonoBehaviour
         }
     }
 
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.transform.CompareTag("Brick"))
+        {
+            var brickScript = other.gameObject.GetComponent<BrickScript>();
+            GameManager.UpdateScore(brickScript.BrickPointValue);
+            brickScript.HitBrick();
+            GameManager.UpdateNumberOfBricks();
+        }
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("BottomBoundary"))
         {
             BallInPlay = false;
+            Rigidbody2D.velocity = Vector2.zero;
+
             GameManager.UpdateLives(-1);
         }
     }
